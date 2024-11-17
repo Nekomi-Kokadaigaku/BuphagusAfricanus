@@ -4,7 +4,7 @@ import SwiftUI
 /// 应用程序代理
 /// 负责应用程序的生命周期管理
 /// 处理window delegate做不到的事情
-class baAppDelegate: NSObject, NSApplicationDelegate {
+public class baAppDelegate: NSObject, NSApplicationDelegate {
 
     var windowMonitor: Any?
     var resizeObserver: NSObjectProtocol?
@@ -12,13 +12,13 @@ class baAppDelegate: NSObject, NSApplicationDelegate {
 
     let currentScreen = NSScreen.main ?? NSScreen.screens.first
 
-    func applicationWillFinishLaunching(_ notification: Notification) {
+    public func applicationWillFinishLaunching(_ notification: Notification) {
         baMainWindowDelegate.shared.setupMainWindow()
         print("applicationWillFinishLaunching")
     }
 
     /// 应用程序完成启动，进行debug window 等的初始化
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    public func applicationDidFinishLaunching(_ notification: Notification) {
 
         let debugWindow = baDebugWindowDelegate.shared.createDebugWindow()
         let configureWindow = baConfigureWindowDelegate.shared
@@ -62,11 +62,11 @@ class baAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// 应用程序退出时，移除监听器
-    func applicationWillTerminate(_ notification: Notification) {
+    public func applicationWillTerminate(_ notification: Notification) {
         removeObservers()
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(
+    public func applicationShouldTerminateAfterLastWindowClosed(
         _ sender: NSApplication
     ) -> Bool { true }
 }
