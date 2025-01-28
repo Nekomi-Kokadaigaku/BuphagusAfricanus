@@ -9,56 +9,40 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
     var windowMonitor: Any?
     var resizeObserver: NSObjectProtocol?
     let manager = baWindowManager.shared
+    let debugState = baDebugState.shared
 
     let currentScreen = NSScreen.main ?? NSScreen.screens.first
 
-    public func applicationWillFinishLaunching(_ notification: Notification) {
-        baMainWindowDelegate.shared.setupMainWindow()
-        print("applicationWillFinishLaunching")
-    }
-
     /// 应用程序完成启动，进行debug window 等的初始化
     public func applicationDidFinishLaunching(_ notification: Notification) {
+        
+        let mWindowD = baMainWindowDelegate.shared
+        let dWindowD = baDebugWindowDelegate.shared
 
-        let debugWindow = baDebugWindowDelegate.shared.createDebugWindow()
+        let _ = dWindowD.createDebugWindow()
         let configureWindow = baConfigureWindowDelegate.shared
             .createConfigureWindow()
         // 设置窗口管理器
+        mWindowD.setupMainWindow()
+        
         manager.mainWindow = NSApplication.shared.windows.first
         manager.debugWindow = baDebugWindowDelegate.shared.debugWindow
         manager.configureWindow = configureWindow
 
-        manager.mainWindow!.isMovableByWindowBackground = true
-
         setupWindowDragAndSnapMonitor()
         setupMainWindowObserver()
 
-        let mainWindowHeight = manager.mainWindow?.frame.size.height
-        let mainWindowMaxX = manager.mainWindow?.frame.maxX
-        let mainWindowMinY = manager.mainWindow?.frame.minY
-
-        let startFrame = NSRect(
-            x: mainWindowMaxX!,
-            y: mainWindowMinY! + (mainWindowHeight! - 200),
-            width: manager.defaultDebugWindowWidth,
-            height: 200)
-
-        let endFrame = NSRect(
-            x: mainWindowMaxX!,
-            y: mainWindowMinY!,
-            width: manager.defaultDebugWindowWidth,
-            height: mainWindowHeight!)
-
-        animateWindow(debugWindow, to: startFrame, duration: 0.0) {}
-        animateWindow(debugWindow, to: endFrame, duration: 0.45) {}
-
-        manager.mainWindow?.addChildWindow(debugWindow, ordered: .above)
-        #if DEVELOPMENT
+        baDebugWindowDelegate.shared.startupAnimation()
+        baDebugWindowDelegate.shared.showDebugWindow()
+        baDebugWindowDelegate.shared.bindtowindow(baMainWindowDelegate.shared.window)
+        
+        // manager.mainWindow?.addChildWindow(debugWindow, ordered: .above)
+        #if ALPHA
             baDebugState.shared.system("debugWindow bind to mainWindow")
         #endif
 
         // 显示调试窗口
-        debugWindow.makeKeyAndOrderFront(nil)
+        // debugWindow.makeKeyAndOrderFront(nil)
     }
 
     /// 应用程序退出时，移除监听器
@@ -66,12 +50,13 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
         removeObservers()
     }
 
+    /// 所有窗口都关闭后退出，一般开发的时候都关了就可以退出了，避免卡住
     public func applicationShouldTerminateAfterLastWindowClosed(
         _ sender: NSApplication
     ) -> Bool { true }
 }
 
-// MARK: - 调试信息窗口
+// MARK: - 配置调试信息窗口
 extension baAppDelegate {
 
     /// 设置调试信息窗口鼠标事件监听器

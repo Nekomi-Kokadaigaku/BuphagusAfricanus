@@ -64,3 +64,5 @@ fastlane/test_output
 =======
 /.build
 >>>>>>> 6c491a2 (Init)
+
+buildServer.json

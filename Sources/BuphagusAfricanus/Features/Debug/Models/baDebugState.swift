@@ -2,9 +2,9 @@ import SwiftUI
 
 
 /// 调试状态管理类
-class baDebugState: ObservableObject {
+public class baDebugState: ObservableObject {
     /// 单例实例
-    static let shared = baDebugState()
+    public static let shared = baDebugState()
 
     /// 是否显示监视面板
     @Published var showWatchPanel: Bool = true
@@ -290,7 +290,7 @@ class baDebugState: ObservableObject {
     }
 
     // 添加更新监视变量的方法
-    func updateWatchVariable(name: String, value: Any, type: String) {
+    public func updateWatchVariable(name: String, value: Any, type: String) {
         guard !name.isEmpty else {
             self.error("Failed to update watch variable: Empty name")
             return
@@ -412,37 +412,37 @@ class baDebugState: ObservableObject {
 // MARK: - 便利方法扩展
 extension baDebugState {
     /// 添加信息类型的消息
-    func info(_ message: String, details: String? = nil) {
+    public func info(_ message: String, details: String? = nil) {
         addMessage(message, type: .info, details: details)
     }
 
     /// 添加警告类型的消息
-    func warning(_ message: String, details: String? = nil) {
+    public func warning(_ message: String, details: String? = nil) {
         addMessage(message, type: .warning, details: details)
     }
 
     /// 添加错误类型的消息
-    func error(_ message: String, details: String? = nil) {
+    public func error(_ message: String, details: String? = nil) {
         addMessage(message, type: .error, details: details)
     }
 
     /// 添加用户操作类型的消息
-    func userAction(_ message: String, details: String? = nil) {
+    public func userAction(_ message: String, details: String? = nil) {
         addMessage(message, type: .userAction, details: details)
     }
 
     /// 添加网络类型的消息
-    func network(_ message: String, details: String? = nil) {
+    public func network(_ message: String, details: String? = nil) {
         addMessage(message, type: .network, details: details)
     }
 
     /// 添加系统类型的消息
-    func system(_ message: String, details: String? = nil) {
+    public func system(_ message: String, details: String? = nil) {
         addMessage(message, type: .system, details: details)
     }
 
     /// 添加性能类型的消息
-    func performance(_ message: String, details: String? = nil) {
+    public func performance(_ message: String, details: String? = nil) {
         addMessage(message, type: .performance, details: details)
     }
 }

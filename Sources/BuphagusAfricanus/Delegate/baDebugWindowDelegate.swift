@@ -30,9 +30,9 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
             contentRect: initialFrame,
             styleMask: [
                 .titled,
-                .closable,
-                .miniaturizable,
-                .resizable,
+//                .closable,
+//                .miniaturizable,
+//                .resizable,
                 .fullSizeContentView,
                 .nonactivatingPanel,
                 .borderless
@@ -102,6 +102,7 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
 
 // MARK: - Window Delegate Methods
 extension baDebugWindowDelegate {
+    
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         saveWindowState(window)
@@ -114,11 +115,13 @@ extension baDebugWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification){
+        #if ALPHA
         if manager.activeWindow == manager.debugWindow {
             baDebugState.shared.system("debug window did move")
         } else {
             baDebugState.shared.system("debug window did move, but not active")
         }
+        #endif
     }
 
     // MARK: - Window State Management
@@ -232,10 +235,48 @@ extension baDebugWindowDelegate {
             showDebugWindow()
         }
     }
-
-    // TODO: - 重置窗口位置到 main window 的右侧并吸附
-    func resetWindowPosition() {
-        guard let window = manager.debugWindow else { return }
-        window.setFrame(initialFrame, display: true)
+    
+    func bindtowindow(_ window: NSWindow?){
+        if let window = window{
+            window.addChildWindow(self.debugWindow!, ordered: .above)
+            baDebugState.shared.system("绑定到了新窗口", details: "Identifier: \(String(describing: window.identifier?.rawValue))")
+        }
     }
+    
+    /// 开屏的移动到正确位置以及动画
+    func startupAnimation(){
+        let mainWindowHeight = manager.mainWindow?.frame.size.height
+        let mainWindowMaxX = manager.mainWindow?.frame.maxX
+        let mainWindowMinY = manager.mainWindow?.frame.minY
+        let startFrame = NSRect(
+            x: mainWindowMaxX!,
+            y: mainWindowMinY! + (mainWindowHeight! - 200),
+            width: manager.defaultDebugWindowWidth,
+            height: 200)
+
+        let endFrame = NSRect(
+            x: mainWindowMaxX!,
+            y: mainWindowMinY!,
+            width: manager.defaultDebugWindowWidth,
+            height: mainWindowHeight!)
+        if let debugWindow = self.debugWindow{
+            animateWindow(debugWindow, to: startFrame, duration: 0.0) {}
+            animateWindow(debugWindow, to: endFrame, duration: 0.45) {}
+        }
+    }
+    
+    /// 窗口移动动画
+    private func animateWindow(
+        _ window: NSWindow, to frame: NSRect, duration: TimeInterval,
+        completion: (() -> Void)? = nil
+    ) {
+        NSAnimationContext.runAnimationGroup(
+            {
+                context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(frame, display: true)
+            }, completionHandler: completion)
+    }
+
 }

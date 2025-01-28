@@ -71,15 +71,14 @@ struct baDebugView: View {
         .background(baVisualEffectView().ignoresSafeArea())
         .allowsHitTesting(true)
         .onAppear {
-            #if DEVELOPMENT
-            debugState.info("调试窗口已显示")
-            #endif
+            #if ALPHA
             debugState.updateWatchVariable(name: "isReadyToSnap", value: manager.isReadyToSnap, type: "Bool")
             debugState.updateWatchVariable(name: "windowState", value: manager.windowState.rawValue, type: "String")
             debugState.updateWatchVariable(name: "windowMode", value: manager.windowMode.rawValue, type: "String")
             debugState.updateWatchVariable(name: "debugWindowSide", value: manager.debugWindowSide.rawValue, type: "String")
             debugState.updateWatchVariable(name: "targetFrameX", value: manager.targetFrame.origin.x, type: "Int")
             debugState.updateWatchVariable(name: "targetFrameY", value: manager.targetFrame.origin.y, type: "Int")
+            #endif
         }
         .onDisappear {
             // 发送重置通知

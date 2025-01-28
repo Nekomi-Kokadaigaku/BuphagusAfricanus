@@ -32,8 +32,10 @@ class baWindowManager: ObservableObject {
     /// 开始拖动的位置
     var dragStartLocation: NSPoint? {
         didSet {
+            #if ALPHA
             baDebugState.shared.updateWatchVariable(name: "dragStartLocationX", value: dragStartLocation?.x ?? 0, type: "Int")
             baDebugState.shared.updateWatchVariable(name: "dragStartLocationY", value: dragStartLocation?.y ?? 0, type: "Int")
+            #endif
         }
     }
     /// 开始拖动前的状态
