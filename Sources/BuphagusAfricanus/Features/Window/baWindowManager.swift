@@ -151,6 +151,16 @@ extension baWindowManager {
     public func changeAnimationMode() {
         windowMode = windowMode == .animation ? .direct : .animation
     }
+    
+    /// 隐藏/显示调试窗口
+    public func changeDebugWindowVisibility() {
+        if debugWindow?.isVisible ?? false {
+            debugWindow?.orderOut(nil)
+        } else {
+            debugWindow?.makeKeyAndOrderFront(nil)
+            mainWindow?.makeKeyAndOrderFront(nil)
+        }
+    }
 }
 
 // MARK: - 辅助方法
