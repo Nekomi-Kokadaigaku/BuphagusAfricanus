@@ -4,9 +4,9 @@
       <code>あ ←→ A</code>
     </summary>
     <br />
-    &emsp;&ensp;English
+    &emsp;&ensp;<a href="/">English</a>
     <br />
-    &emsp;&ensp;<a href="/README_CN.md">简体中文</a>
+    &emsp;&ensp;简体中文
   </details>
 </blockquote>
 
