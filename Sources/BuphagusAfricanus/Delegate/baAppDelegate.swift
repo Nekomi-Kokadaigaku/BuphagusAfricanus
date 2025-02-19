@@ -346,5 +346,6 @@ func animateWindow(
             context.duration = duration
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             window.animator().setFrame(frame, display: true)
+//            window.setFrame(frame, display: true)
         }, completionHandler: completion)
 }

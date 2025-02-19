@@ -1,3 +1,11 @@
+//
+//  baWindowManager.swift
+//  BuphagusAfricanus
+//
+//  Created by Iris on 2025-01-28.
+//
+
+import Foundation
 import AppKit
 import SwiftUI
 import Combine
@@ -142,7 +150,7 @@ extension baWindowManager {
 
     /// 获取有效的吸附距离
     func getEffectiveSnapDistance(for frame1: NSRect, and frame2: NSRect) -> CGFloat {
-        return isWindowsOverlapping(frame1, frame2) ? snapDistanceInside : snapDistanceOutside
+        return isWindowsOverlbapDistanceInside : snapDistanceOutside
     }
 
     /// 吸附动画方法

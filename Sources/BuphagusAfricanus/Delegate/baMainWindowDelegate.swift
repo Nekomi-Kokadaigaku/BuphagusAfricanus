@@ -20,11 +20,16 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
 
         self.window = NSApplication.shared.windows.first
-        self.window?.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+//        self.window?.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+        self.window?.styleMask = [.titled, .resizable]
         self.window?.delegate = self
         self.window?.title = "Bilibili"
         self.window?.identifier = NSUserInterfaceItemIdentifier(self.indentifier)
         self.window?.isReleasedWhenClosed = true
+        
+        self.window?.standardWindowButton(.closeButton)?.isHidden = true
+        self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        self.window?.standardWindowButton(.zoomButton)?.isHidden = true
 
         // window.alphaValue = 0.8
         self.window?.animationBehavior = .documentWindow
@@ -34,7 +39,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
         // 外观设置
         self.window?.titlebarAppearsTransparent = true
-        self.window?.titleVisibility = .visible
+        self.window?.titleVisibility = .hidden
         self.window?.isMovableByWindowBackground = true
         // self.window?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
 
