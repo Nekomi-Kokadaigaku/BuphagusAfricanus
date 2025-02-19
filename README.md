@@ -14,8 +14,6 @@
 
 这是一个辅助开发的工具，用于实时显示变量的值，记录日志等功能。
 
-## Using
+## Usage
 
-```swift
-Waiting for update...
-```
+See [BuphagusAfricanus-Demo](https://github.com/Nekomi-Kokadaigaku/BuphagusAfricanus-Demo).

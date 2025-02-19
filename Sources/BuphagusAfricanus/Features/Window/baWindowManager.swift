@@ -122,7 +122,7 @@ public class baWindowManager: ObservableObject {
 }
 
 // MARK: - 枚举类
-extension baWindowManager{
+extension baWindowManager {
 
     /// 窗口状态枚举
     enum WindowState: String {
@@ -141,6 +141,15 @@ extension baWindowManager{
     enum Side: String {
         case left = "左侧"
         case right = "右侧"
+    }
+}
+
+// MARK: - 功能性函数
+extension baWindowManager {
+    
+    /// 切换 debug window 的吸附动画模式
+    public func changeAnimationMode() {
+        windowMode = windowMode == .animation ? .direct : .animation
     }
 }
 
