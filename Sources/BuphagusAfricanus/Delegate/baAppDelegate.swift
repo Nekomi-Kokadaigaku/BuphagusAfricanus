@@ -6,6 +6,7 @@ import SwiftUI
 /// 处理window delegate做不到的事情
 public class baAppDelegate: NSObject, NSApplicationDelegate {
 
+    ///
     var windowMonitor: Any?
     var resizeObserver: NSObjectProtocol?
     let manager = baWindowManager.shared
@@ -15,16 +16,16 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
 
     /// 应用程序完成启动，进行debug window 等的初始化
     public func applicationDidFinishLaunching(_ notification: Notification) {
-        
+
         let mWindowD = baMainWindowDelegate.shared
         let dWindowD = baDebugWindowDelegate.shared
 
-        let _ = dWindowD.createDebugWindow()
+        dWindowD.createDebugWindow()
         let configureWindow = baConfigureWindowDelegate.shared
             .createConfigureWindow()
         // 设置窗口管理器
         mWindowD.setupMainWindow()
-        
+
         manager.mainWindow = NSApplication.shared.windows.first
         manager.debugWindow = baDebugWindowDelegate.shared.debugWindow
         manager.configureWindow = configureWindow
@@ -35,7 +36,7 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
         baDebugWindowDelegate.shared.startupAnimation()
         baDebugWindowDelegate.shared.showDebugWindow()
         baDebugWindowDelegate.shared.bindtowindow(baMainWindowDelegate.shared.window)
-        
+
         // manager.mainWindow?.addChildWindow(debugWindow, ordered: .above)
         #if ALPHA
             baDebugState.shared.system("debugWindow bind to mainWindow")
@@ -61,7 +62,7 @@ extension baAppDelegate {
 
     /// 设置调试信息窗口鼠标事件监听器
     func setupWindowDragAndSnapMonitor() {
-        // 监听调试窗口的拖拽
+        // 监听调试窗口的鼠标事件: 点击, 拖拽, 释放
         windowMonitor = NSEvent.addLocalMonitorForEvents(matching: [
             .leftMouseDown, .leftMouseDragged, .leftMouseUp,
         ]) { [weak self] event in
@@ -69,12 +70,9 @@ extension baAppDelegate {
                 let debugWindow = self.manager.debugWindow,
                 let mainWindow = self.manager.mainWindow,
                 event.window == debugWindow
-            else {
-                return event
-            }
+            else { return event }
 
-            return self.handleDebugWindowDrag(
-                event, debugWindow: debugWindow, mainWindow: mainWindow)
+            return self.handleDebugWindowDrag(event, debugWindow: debugWindow, mainWindow: mainWindow)
         }
     }
 
@@ -85,8 +83,7 @@ extension baAppDelegate {
         switch event.type {
         case .leftMouseDown:
             // 记录拖动开始位置和状态
-            manager.dragStartLocation = debugWindow.convertPoint(
-                fromScreen: NSEvent.mouseLocation)
+            manager.dragStartLocation = debugWindow.convertPoint(fromScreen: NSEvent.mouseLocation)
             manager.stateBeforeDrag = manager.windowState
 
         case .leftMouseDragged:
@@ -346,6 +343,7 @@ func animateWindow(
             context.duration = duration
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             window.animator().setFrame(frame, display: true)
-//            window.setFrame(frame, display: true)
+            // 效果不好
+            // window.setFrame(frame, display: true)
         }, completionHandler: completion)
 }

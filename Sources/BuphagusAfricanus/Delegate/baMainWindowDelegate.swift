@@ -13,8 +13,8 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         self.indentifier = identifier
     }
 
-    @MainActor
-    func setupMainWindow() {
+    /// 配置主窗口的一些属性包括delegate标题等
+    @MainActor func setupMainWindow() {
         // 确保在主线程上执行
         // guard let self = self else { return }
 
@@ -26,7 +26,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         self.window?.title = "Bilibili"
         self.window?.identifier = NSUserInterfaceItemIdentifier(self.indentifier)
         self.window?.isReleasedWhenClosed = true
-        
+
         self.window?.standardWindowButton(.closeButton)?.isHidden = true
         self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true
         self.window?.standardWindowButton(.zoomButton)?.isHidden = true

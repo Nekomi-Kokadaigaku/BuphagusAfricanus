@@ -36,20 +36,24 @@ class baWindowManager: ObservableObject {
     let snapDistanceOutside: CGFloat = 70    // 外部吸附距离
     let snapDistanceInside: CGFloat = 290    // 内部吸附距离
     let dragStartThreshold: CGFloat = 0      // 拖动开始阈值
+    
+    @Published var showSelfDebugInfo: Bool = false
 
     /// 开始拖动的位置
     var dragStartLocation: NSPoint? {
         didSet {
-            #if ALPHA
-            baDebugState.shared.updateWatchVariable(name: "dragStartLocationX", value: dragStartLocation?.x ?? 0, type: "Int")
-            baDebugState.shared.updateWatchVariable(name: "dragStartLocationY", value: dragStartLocation?.y ?? 0, type: "Int")
-            #endif
+            if showSelfDebugInfo {
+                baDebugState.shared.updateWatchVariable(name: "dragStartLocationX", value: dragStartLocation?.x ?? 0, type: "Int")
+                baDebugState.shared.updateWatchVariable(name: "dragStartLocationY", value: dragStartLocation?.y ?? 0, type: "Int")
+            }
         }
     }
     /// 开始拖动前的状态
     var stateBeforeDrag: WindowState? {
         didSet {
-            baDebugState.shared.updateWatchVariable(name: "stateBeforeDrag", value: stateBeforeDrag?.rawValue ?? "unknown", type: "String")
+            if showSelfDebugInfo {
+                baDebugState.shared.updateWatchVariable(name: "stateBeforeDrag", value: stateBeforeDrag?.rawValue ?? "unknown", type: "String")
+            }
         }
     }
 
@@ -150,7 +154,7 @@ extension baWindowManager {
 
     /// 获取有效的吸附距离
     func getEffectiveSnapDistance(for frame1: NSRect, and frame2: NSRect) -> CGFloat {
-        return isWindowsOverlbapDistanceInside : snapDistanceOutside
+        return isWindowsOverlapping(frame1, frame2) ? snapDistanceInside : snapDistanceOutside
     }
 
     /// 吸附动画方法

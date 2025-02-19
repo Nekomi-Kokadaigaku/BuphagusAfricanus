@@ -25,14 +25,12 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
     ///   - 隐藏关闭按钮
     ///   - 隐藏最小化按钮
     ///   - 隐藏缩放按钮
-    func createDebugWindow() -> NSWindow {
+    // func createDebugWindow() -> NSWindow {
+    func createDebugWindow() {
         let window = NSWindow(
             contentRect: initialFrame,
             styleMask: [
                 .titled,
-//                .closable,
-//                .miniaturizable,
-//                .resizable,
                 .fullSizeContentView,
                 .nonactivatingPanel,
                 .borderless
@@ -43,7 +41,7 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
 
         configureWindow(window)
         self.debugWindow = window
-        return window
+        // return window
     }
 
     /// 配置调试窗口
@@ -102,7 +100,7 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
 
 // MARK: - Window Delegate Methods
 extension baDebugWindowDelegate {
-    
+
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         saveWindowState(window)
@@ -235,14 +233,14 @@ extension baDebugWindowDelegate {
             showDebugWindow()
         }
     }
-    
+
     func bindtowindow(_ window: NSWindow?){
         if let window = window{
             window.addChildWindow(self.debugWindow!, ordered: .above)
             baDebugState.shared.system("绑定到了新窗口", details: "Identifier: \(String(describing: window.identifier?.rawValue))")
         }
     }
-    
+
     /// 开屏的移动到正确位置以及动画
     func startupAnimation(){
         let mainWindowHeight = manager.mainWindow?.frame.size.height
@@ -264,7 +262,7 @@ extension baDebugWindowDelegate {
             animateWindow(debugWindow, to: endFrame, duration: 0.45) {}
         }
     }
-    
+
     /// 窗口移动动画
     private func animateWindow(
         _ window: NSWindow, to frame: NSRect, duration: TimeInterval,

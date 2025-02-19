@@ -27,13 +27,13 @@ struct baMainWindowView: View {
                 Button("增加计数") {
                     incrementCounter()
                 }
-                .buttonStyle(baMainWindowButtonStyle())
+//                .buttonStyle(baMainWindowButtonStyle())
 
                 // 重置窗口位置按钮
                 Button("重置窗口位置") {
                     manager.snapDebugWindowToMain()
                 }
-                .buttonStyle(baMainWindowButtonStyle())
+//                .buttonStyle(baMainWindowButtonStyle())
 
                 Button("切换动画模式") {
                     withAnimation {
@@ -42,7 +42,7 @@ struct baMainWindowView: View {
                             ? .direct : .animation
                     }
                 }
-                .buttonStyle(baMainWindowButtonStyle(color: .blue))
+//                .buttonStyle(baMainWindowButtonStyle(color: .blue))
                 Button("显示调试窗口") {
                     withAnimation {
                         if manager.debugWindow?.isVisible ?? false {
@@ -53,7 +53,7 @@ struct baMainWindowView: View {
                         }
                     }
                 }
-                .buttonStyle(baMainWindowButtonStyle(color: .blue))
+//                .buttonStyle(baMainWindowButtonStyle(color: .blue))
                 Button("测试信息") {
                     // 添加应用信息
                     let bundle = Bundle.main
@@ -68,14 +68,14 @@ struct baMainWindowView: View {
                         )
                     #endif
                 }
-                .buttonStyle(baMainWindowButtonStyle(color: .red))
+//                .buttonStyle(baMainWindowButtonStyle(color: .red))
             }
             .padding()
 
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        
+
     }
 }
 
