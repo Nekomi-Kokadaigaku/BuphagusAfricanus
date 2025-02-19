@@ -12,11 +12,11 @@ import Combine
 
 
 /// 窗口管理器
-class baWindowManager: ObservableObject {
-    static let shared = baWindowManager()
+public class baWindowManager: ObservableObject {
+    public static let shared = baWindowManager()
 
     // 确保单例
-    private init() {}
+    public init() {}
 
     let debugWindowName = "debugWindow"
 
@@ -158,7 +158,7 @@ extension baWindowManager {
     }
 
     /// 吸附动画方法
-    func snapDebugWindowToMain() {
+    public func snapDebugWindowToMain() {
         // let windows = NSApplication.shared.windows
         // guard let currentWindow = windows.first(where: { $0.title == "debugWindow" }),
         //       let mainWindow = windows.first(where: { $0.title != "debugWindow" }) else { return }
