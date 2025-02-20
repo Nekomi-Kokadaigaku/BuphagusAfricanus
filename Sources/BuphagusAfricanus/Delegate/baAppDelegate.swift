@@ -1,3 +1,10 @@
+//
+//  baAppDelegate.swift
+//  BuphagusAfricanus
+//
+//  Created by Iris on 2025-02-12.
+//
+
 import SwiftUI
 
 
@@ -17,13 +24,17 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
     /// 应用程序完成启动，进行debug window 等的初始化
     public func applicationDidFinishLaunching(_ notification: Notification) {
 
+        // 获取 main window 和 debug window
         let mWindowD = baMainWindowDelegate.shared
         let dWindowD = baDebugWindowDelegate.shared
 
+        // 创建 debug window
         dWindowD.createDebugWindow()
-        let configureWindow = baConfigureWindowDelegate.shared
-            .createConfigureWindow()
-        // 设置窗口管理器
+        
+        // 创建 debug window 的 configuration window
+        let configureWindow = baConfigureWindowDelegate.shared.createConfigureWindow()
+        
+        // 配置 main window
         mWindowD.setupMainWindow()
 
         manager.mainWindow = NSApplication.shared.windows.first
@@ -35,12 +46,15 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
 
         baDebugWindowDelegate.shared.startupAnimation()
         baDebugWindowDelegate.shared.showDebugWindow()
-        baDebugWindowDelegate.shared.bindtowindow(baMainWindowDelegate.shared.window)
+        baDebugWindowDelegate.shared.bindToMainWindow(to: baMainWindowDelegate.shared.window)
 
         // manager.mainWindow?.addChildWindow(debugWindow, ordered: .above)
-        #if ALPHA
+        if baGlobalConfig.shared.isDebugMode {
+            // 执行调试相关代码
+            // #if ALPHA
             baDebugState.shared.system("debugWindow bind to mainWindow")
-        #endif
+            // #endif
+        }
 
         // 显示调试窗口
         // debugWindow.makeKeyAndOrderFront(nil)
@@ -52,9 +66,7 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// 所有窗口都关闭后退出，一般开发的时候都关了就可以退出了，避免卡住
-    public func applicationShouldTerminateAfterLastWindowClosed(
-        _ sender: NSApplication
-    ) -> Bool { true }
+    public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }
 
 // MARK: - 配置调试信息窗口
@@ -183,12 +195,16 @@ extension baAppDelegate {
             #endif
         }
 
-        // 执行吸附动画
-        animateWindow(debugWindow, to: newFrame, duration: 0.24) {
+        manager.animationWindow(
+            actorWindow: debugWindow,
+            fromFrame: newFrame,
+            targetFrame: newFrame,
+            duration: 0.15
+        ) {
             mainWindow.addChildWindow(debugWindow, ordered: .above)
-            #if DEVELOPMENT
-                baDebugState.shared.system("执行吸附动画并设置为子窗口")
-            #endif
+            // #if DEVELOPMENT
+            //     baDebugState.shared.system("执行吸附动画并设置为子窗口")
+            // #endif
         }
 
         manager.windowState = .attached
@@ -305,9 +321,7 @@ extension baAppDelegate {
     /// 否则，不做任何操作
     private func handleMainWindowResize(_ notification: Notification) {
         guard let mainWindow = notification.object as? NSWindow,
-            let debugWindow = manager.debugWindow,
-            debugWindow.parent != nil
-        else { return }
+            let debugWindow = manager.debugWindow, debugWindow.parent != nil else { return }
 
         var newFrame = debugWindow.frame
         newFrame.size.height = mainWindow.frame.height
@@ -326,7 +340,13 @@ extension baAppDelegate {
         newFrame.origin.y = mainWindow.frame.minY
 
         if manager.windowMode == .animation {
-            animateWindow(debugWindow, to: newFrame, duration: 0.4)
+            manager.animationWindow(
+                actorWindow: debugWindow,
+                fromFrame: newFrame,
+                targetFrame: newFrame,
+                duration: 0.4,
+                completionHandler: {}
+            )
         } else {
             debugWindow.setFrame(newFrame, display: true)
         }
@@ -337,13 +357,13 @@ func animateWindow(
     _ window: NSWindow, to frame: NSRect, duration: TimeInterval,
     completion: (() -> Void)? = nil
 ) {
-    NSAnimationContext.runAnimationGroup(
-        {
-            context in
-            context.duration = duration
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            window.animator().setFrame(frame, display: true)
-            // 效果不好
-            // window.setFrame(frame, display: true)
-        }, completionHandler: completion)
+    NSAnimationContext.runAnimationGroup { context in
+        context.duration = duration
+        context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        window.animator().setFrame(frame, display: true)
+        // 效果不好
+        // window.setFrame(frame, display: true)
+    } completionHandler: {
+        completion
+    }
 }

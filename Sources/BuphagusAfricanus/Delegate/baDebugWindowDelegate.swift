@@ -1,3 +1,10 @@
+//
+//  baDebugWindowDelegate.swift
+//  BiliBili
+//
+//  Created by Iris on 2025-02-12.
+//
+
 import AppKit
 import SwiftUI
 
@@ -208,25 +215,39 @@ extension baDebugWindowDelegate {
         }
         newFrame.origin.y = mainWindow.frame.minY
 
-        animateWindow(window, to: newFrame, duration: 0.3)
+        manager.animationWindow(
+            actorWindow: window,
+            fromFrame: newFrame,
+            targetFrame: newFrame,
+            duration: 0.3,
+            completionHandler: {}
+        )
     }
 }
 
 // MARK: - Public Methods
 extension baDebugWindowDelegate {
+
     /// 显示调试窗口
     func showDebugWindow() {
-        guard let window = manager.debugWindow else { return }
+        
+        guard let window = manager.debugWindow else {
+            baDebugState.shared.system("debug window 不存在")
+            return
+        }
+        
         window.makeKeyAndOrderFront(nil)
     }
 
     /// 隐藏调试窗口
     func hideDebugWindow() {
+        
         manager.debugWindow?.orderOut(nil)
     }
 
     /// 切换调试窗口显示状态
     func toggleDebugWindow() {
+        
         if manager.debugWindow?.isVisible ?? false {
             hideDebugWindow()
         } else {
@@ -234,18 +255,26 @@ extension baDebugWindowDelegate {
         }
     }
 
-    func bindtowindow(_ window: NSWindow?){
-        if let window = window{
-            window.addChildWindow(self.debugWindow!, ordered: .above)
-            baDebugState.shared.system("绑定到了新窗口", details: "Identifier: \(String(describing: window.identifier?.rawValue))")
+    func bindToMainWindow(to window: NSWindow?){
+        
+        if let window = window, let debugWindow = self.debugWindow {
+            
+            window.addChildWindow(debugWindow, ordered: .above)
+            baDebugState.shared.system(
+                "绑定到了新窗口",
+                details: "Identifier: \(String(describing: window.identifier?.rawValue))")
+        } else {
+            baDebugState.shared.error("绑定到 window 出错 / debug window 不存在")
         }
     }
 
-    /// 开屏的移动到正确位置以及动画
-    func startupAnimation(){
+    /// 启动程序后进行的动画展示
+    func startupAnimation() {
+        
         let mainWindowHeight = manager.mainWindow?.frame.size.height
         let mainWindowMaxX = manager.mainWindow?.frame.maxX
         let mainWindowMinY = manager.mainWindow?.frame.minY
+        
         let startFrame = NSRect(
             x: mainWindowMaxX!,
             y: mainWindowMinY! + (mainWindowHeight! - 200),
@@ -257,24 +286,23 @@ extension baDebugWindowDelegate {
             y: mainWindowMinY!,
             width: manager.defaultDebugWindowWidth,
             height: mainWindowHeight!)
-        if let debugWindow = self.debugWindow{
-            animateWindow(debugWindow, to: startFrame, duration: 0.0) {}
-            animateWindow(debugWindow, to: endFrame, duration: 0.45) {}
+        if let debugWindow = self.debugWindow {
+            
+            // 放到正确位置
+            manager.animationWindow(
+                actorWindow: debugWindow,
+                fromFrame: startFrame,
+                targetFrame: startFrame,
+                duration: 0
+            )
+            
+            // 展开 debug window
+            manager.animationWindow(
+                actorWindow: debugWindow,
+                fromFrame: endFrame,
+                targetFrame: endFrame,
+                duration: 0.45
+            )
         }
     }
-
-    /// 窗口移动动画
-    private func animateWindow(
-        _ window: NSWindow, to frame: NSRect, duration: TimeInterval,
-        completion: (() -> Void)? = nil
-    ) {
-        NSAnimationContext.runAnimationGroup(
-            {
-                context in
-                context.duration = duration
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                window.animator().setFrame(frame, display: true)
-            }, completionHandler: completion)
-    }
-
 }

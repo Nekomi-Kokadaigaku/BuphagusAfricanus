@@ -19,26 +19,9 @@ struct baDebugView: View {
 
     var body: some View {
 
-        // 背景色
-        // Color(NSColor.windowBackgroundColor)
-        //     .ignoresSafeArea()
-        // LinearGradient(
-        //     gradient: Gradient(colors: [Color.purple, Color.blue]),
-        //     startPoint: .topLeading,
-        //     endPoint: .bottomTrailing
-        // )
-        // LinearGradient(
-        //     gradient: Gradient(colors: [Color(hex: "2C3E50"), Color(hex: "3498DB")]),
-        //     startPoint: .topLeading,
-        //     endPoint: .bottomTrailing
-        // )
-        // themeManager.currentTheme.backgroundColor
-        //     .ignoresSafeArea()
-
         VStack(spacing: 0) {
-            toolbarView
-                .frame(maxWidth: .infinity)
-                .background(themeManager.currentTheme.toolbarColor)
+            toolbarView()
+                
             Divider()
 
             // 主要内容区域
@@ -101,7 +84,7 @@ struct baDebugView: View {
 extension baDebugView {
 
     /// 工具栏视图
-    private var toolbarView: some View {
+    @ViewBuilder private func toolbarView() -> some View {
         VStack(spacing: 8) {
             // 第一行
             HStack {
@@ -219,10 +202,12 @@ extension baDebugView {
                     })
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 12, .random)
         .padding(.vertical, 8)
         // .background(Color(NSColor.windowBackgroundColor))
         .background(Color.clear)
+        .frame(maxWidth: .infinity)
+        .background(themeManager.currentTheme.toolbarColor)
     }
 }
 

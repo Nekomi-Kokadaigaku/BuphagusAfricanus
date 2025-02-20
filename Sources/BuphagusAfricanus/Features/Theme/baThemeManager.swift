@@ -36,11 +36,11 @@ struct DebugTheme {
     )
 
     static let dark = DebugTheme(
-        backgroundColor: Color(hex: "1E1E1E"),
+        backgroundColor: Color(fromHex: "1E1E1E"),
         textColor: Color.white,
         accentColor: Color.blue,
-        toolbarColor: Color(hex: "252526"),
-        dividerColor: Color(hex: "333333"),
+        toolbarColor: Color(fromHex: "252526"),
+        dividerColor: Color(fromHex: "333333"),
         titleFont: .system(size: 13, weight: .medium),
         bodyFont: .system(size: 12),
         monoFont: .system(size: 11, design: .monospaced),

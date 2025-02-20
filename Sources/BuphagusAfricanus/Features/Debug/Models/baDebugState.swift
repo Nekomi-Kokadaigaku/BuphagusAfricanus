@@ -535,7 +535,8 @@ struct baDebugMessage: Identifiable, Hashable, Codable {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss.SSS"
 
-        return "[\(dateFormatter.string(from: timestamp))][\(threadName)][\(type.rawValue)] \(content)"
+//        return "[\(dateFormatter.string(from: timestamp))][\(threadName)][\(type.rawValue)] \(content)"
+        return "[\(dateFormatter.string(from: timestamp))][\(type.rawValue)] \(content)"
     }
 
     /// Hashable协议实现

@@ -1,3 +1,10 @@
+//
+//  baObserverInfo.swift
+//  BiliBili
+//
+//  Created by Iris on 2025-02-12.
+//
+
 import Foundation
 
 
