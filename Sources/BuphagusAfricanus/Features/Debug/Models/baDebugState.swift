@@ -12,10 +12,12 @@ public class baDebugState: ObservableObject {
     /// 窗口吸附状态
     @Published var isAttached: Bool = false {
         didSet {
-            if oldValue != isAttached {
-                print("Debug: Attach state changed to \(isAttached)")
-                notifyAttachStateChange()
-                saveAttachState()
+            if baGlobalConfig.shared.isDebugMode {
+                if oldValue != isAttached {
+                    print("Debug: Attach state changed to \(isAttached)")
+                    notifyAttachStateChange()
+                    saveAttachState()
+                }
             }
         }
     }

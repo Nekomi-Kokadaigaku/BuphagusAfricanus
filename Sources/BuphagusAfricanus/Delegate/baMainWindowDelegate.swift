@@ -79,9 +79,9 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
 extension baMainWindowDelegate {
     func windowDidBecomeKey(_ notification: Notification) {
-        #if ALPHA
-        baDebugState.shared.system("main window did become key")
-        #endif
+        if baGlobalConfig.shared.isDebugMode {
+            baDebugState.shared.system("main window did become key")
+        }
         manager.activeWindow = window
     }
 }

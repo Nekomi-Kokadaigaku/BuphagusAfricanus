@@ -50,10 +50,7 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
 
         // manager.mainWindow?.addChildWindow(debugWindow, ordered: .above)
         if baGlobalConfig.shared.isDebugMode {
-            // 执行调试相关代码
-            // #if ALPHA
             baDebugState.shared.system("debugWindow bind to mainWindow")
-            // #endif
         }
 
         // 显示调试窗口

@@ -73,7 +73,7 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
         window.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
 
         // 内容视图设置
-        window.contentView = NSHostingView(rootView: baDebugView(windowId: manager.debugWindowName))
+        window.contentView = NSHostingView(rootView: baDebugView())
         window.contentView?.wantsLayer = true
         window.contentView?.layerContentsRedrawPolicy = .onSetNeedsDisplay
 
@@ -120,13 +120,15 @@ extension baDebugWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification){
-        #if ALPHA
-        if manager.activeWindow == manager.debugWindow {
-            baDebugState.shared.system("debug window did move")
-        } else {
-            baDebugState.shared.system("debug window did move, but not active")
+            
+        if baGlobalConfig.shared.isDebugMode {
+            
+            if manager.activeWindow == manager.debugWindow {
+                baDebugState.shared.system("debug window did move")
+            } else {
+                baDebugState.shared.system("debug window did move, but not active")
+            }
         }
-        #endif
     }
 
     // MARK: - Window State Management

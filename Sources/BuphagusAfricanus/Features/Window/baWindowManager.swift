@@ -44,13 +44,15 @@ public class baWindowManager: ObservableObject {
     /// 开始拖动的位置
     var dragStartLocation: NSPoint? {
         didSet {
-            if showSelfDebugInfo {
-                baDebugState.shared.updateWatchVariable(
-                    name: "dragStartLocationX",
-                    value: dragStartLocation?.x ?? 0, type: "Int")
-                baDebugState.shared.updateWatchVariable(
-                    name: "dragStartLocationY",
-                    value: dragStartLocation?.y ?? 0, type: "Int")
+            if baGlobalConfig.shared.isDebugMode {
+                if showSelfDebugInfo {
+                    baDebugState.shared.updateWatchVariable(
+                        name: "dragStartLocationX",
+                        value: dragStartLocation?.x ?? 0, type: "Int")
+                    baDebugState.shared.updateWatchVariable(
+                        name: "dragStartLocationY",
+                        value: dragStartLocation?.y ?? 0, type: "Int")
+                }
             }
         }
     }
@@ -58,11 +60,13 @@ public class baWindowManager: ObservableObject {
     /// 开始拖动前的状态
     var stateBeforeDrag: WindowState? {
         didSet {
-            if showSelfDebugInfo {
-                baDebugState.shared.updateWatchVariable(
-                    name: "stateBeforeDrag",
-                    value: stateBeforeDrag?.rawValue ?? "unknown",
-                    type: "String")
+            if baGlobalConfig.shared.isDebugMode {
+                if showSelfDebugInfo {
+                    baDebugState.shared.updateWatchVariable(
+                        name: "stateBeforeDrag",
+                        value: stateBeforeDrag?.rawValue ?? "unknown",
+                        type: "String")
+                }
             }
         }
     }
@@ -73,37 +77,46 @@ public class baWindowManager: ObservableObject {
     /// debug window 贴合方向
     @Published var debugWindowSide: Side = .right {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "debugWindowSide", value: debugWindowSide.rawValue,
-                type: "String")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "debugWindowSide",
+                    value: debugWindowSide.rawValue,
+                    type: "String")
+            }
         }
     }
 
     /// 期望的窗口位置
     @Published var targetFrame: NSRect = .zero {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "targetFrameX", value: targetFrame.origin.x, type: "Int")
-            baDebugState.shared.updateWatchVariable(
-                name: "targetFrameY", value: targetFrame.origin.y, type: "Int")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "targetFrameX", value: targetFrame.origin.x, type: "Int")
+                baDebugState.shared.updateWatchVariable(
+                    name: "targetFrameY", value: targetFrame.origin.y, type: "Int")
+            }
         }
     }
 
     /// 期望的坐标点
     @Published var targetPosition: CGPoint = .zero {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "targetPositionX", value: targetPosition.x, type: "Int")
-            baDebugState.shared.updateWatchVariable(
-                name: "targetPositionY", value: targetPosition.y, type: "Int")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "targetPositionX", value: targetPosition.x, type: "Int")
+                baDebugState.shared.updateWatchVariable(
+                    name: "targetPositionY", value: targetPosition.y, type: "Int")
+            }
         }
     }
 
     /// 是否需要更新窗口位置
     @Published var needUpdate = false {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "needUpdate", value: needUpdate, type: "Bool")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "needUpdate", value: needUpdate, type: "Bool")
+            }
         }
     }
 
@@ -113,25 +126,31 @@ public class baWindowManager: ObservableObject {
     /// 窗口动画模式
     @Published var windowMode: WindowMode = .direct {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "windowMode", value: windowMode.rawValue, type: "String")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "windowMode", value: windowMode.rawValue, type: "String")
+            }
         }
     }
 
     /// 是否准备好吸附
     @Published var isReadyToSnap = false {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "isReadyToSnap", value: isReadyToSnap, type: "Bool")
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "isReadyToSnap", value: isReadyToSnap, type: "Bool")
+            }
         }
     }
 
     /// 窗口状态: 已吸附、已分离、拖拽中
     @Published var windowState: WindowState = .attached {
         didSet {
-            baDebugState.shared.updateWatchVariable(
-                name: "windowState", value: windowState.rawValue, type: "String"
-            )
+            if baGlobalConfig.shared.isDebugMode {
+                baDebugState.shared.updateWatchVariable(
+                    name: "windowState", value: windowState.rawValue, type: "String"
+                )
+            }
         }
     }
 

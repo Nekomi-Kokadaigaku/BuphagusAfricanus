@@ -7,7 +7,6 @@ import Foundation
 
 /// 调试视图
 struct baDebugView: View {
-    let windowId: String
 
     @State private var autoScroll = baDebugState.shared.autoScroll
     @State private var isPaused = baDebugState.shared.isPaused
@@ -54,14 +53,14 @@ struct baDebugView: View {
         .background(baVisualEffectView().ignoresSafeArea())
         .allowsHitTesting(true)
         .onAppear {
-            #if ALPHA
-            debugState.updateWatchVariable(name: "isReadyToSnap", value: manager.isReadyToSnap, type: "Bool")
-            debugState.updateWatchVariable(name: "windowState", value: manager.windowState.rawValue, type: "String")
-            debugState.updateWatchVariable(name: "windowMode", value: manager.windowMode.rawValue, type: "String")
-            debugState.updateWatchVariable(name: "debugWindowSide", value: manager.debugWindowSide.rawValue, type: "String")
-            debugState.updateWatchVariable(name: "targetFrameX", value: manager.targetFrame.origin.x, type: "Int")
-            debugState.updateWatchVariable(name: "targetFrameY", value: manager.targetFrame.origin.y, type: "Int")
-            #endif
+            if baGlobalConfig.shared.isDebugMode {
+                debugState.updateWatchVariable(name: "isReadyToSnap", value: manager.isReadyToSnap, type: "Bool")
+                debugState.updateWatchVariable(name: "windowState", value: manager.windowState.rawValue, type: "String")
+                debugState.updateWatchVariable(name: "windowMode", value: manager.windowMode.rawValue, type: "String")
+                debugState.updateWatchVariable(name: "debugWindowSide", value: manager.debugWindowSide.rawValue, type: "String")
+                debugState.updateWatchVariable(name: "targetFrameX", value: manager.targetFrame.origin.x, type: "Int")
+                debugState.updateWatchVariable(name: "targetFrameY", value: manager.targetFrame.origin.y, type: "Int")
+            }
         }
         .onDisappear {
             // 发送重置通知
