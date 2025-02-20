@@ -58,7 +58,7 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
         window.identifier = NSUserInterfaceItemIdentifier(manager.debugWindowName)
         window.delegate = self
 
-        // window.alphaValue = 0.8
+        window.alphaValue = 0.64
         window.hasShadow = true
 
         window.animationBehavior = .documentWindow

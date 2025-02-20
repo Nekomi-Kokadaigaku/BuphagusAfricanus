@@ -349,18 +349,3 @@ extension baAppDelegate {
         }
     }
 }
-
-func animateWindow(
-    _ window: NSWindow, to frame: NSRect, duration: TimeInterval,
-    completion: (() -> Void)? = nil
-) {
-    NSAnimationContext.runAnimationGroup { context in
-        context.duration = duration
-        context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        window.animator().setFrame(frame, display: true)
-        // 效果不好
-        // window.setFrame(frame, display: true)
-    } completionHandler: {
-        completion
-    }
-}

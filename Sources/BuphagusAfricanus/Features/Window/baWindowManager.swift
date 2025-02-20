@@ -220,7 +220,7 @@ extension baWindowManager {
         }
 
         let (newFrame, newSnapSide) = snapWindow(from: currentWindow, to: mainWindow)
-        
+
         debugWindowSide = newSnapSide
 
         animationWindow(actorWindow: currentWindow, fromFrame: currentWindow.frame, targetFrame: newFrame) {

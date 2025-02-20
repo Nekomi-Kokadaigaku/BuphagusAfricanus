@@ -21,9 +21,10 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
         self.window = NSApplication.shared.windows.first
 //        self.window?.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
-        self.window?.styleMask = [.titled, .resizable]
+//        self.window?.styleMask = [.titled, .resizable]
+//        self.window?.styleMask = [.resizable]
         self.window?.delegate = self
-        self.window?.title = "Bilibili"
+//        self.window?.title = "Bilibili"
         self.window?.identifier = NSUserInterfaceItemIdentifier(self.indentifier)
         self.window?.isReleasedWhenClosed = true
 
@@ -31,7 +32,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true
         self.window?.standardWindowButton(.zoomButton)?.isHidden = true
 
-        // window.alphaValue = 0.8
+        self.window?.alphaValue = 0.98
         self.window?.animationBehavior = .documentWindow
         // 工具提示
         self.window?.toolbar?.displayMode = .iconOnly           // 工具栏显示模式
