@@ -280,13 +280,13 @@ extension baDebugWindowDelegate {
         let startFrame = NSRect(
             x: mainWindowMaxX!,
             y: mainWindowMinY! + (mainWindowHeight! - 200),
-            width: manager.defaultDebugWindowWidth,
+            width: windowConstant.defaultDebugWindowWidth,
             height: 200)
 
         let endFrame = NSRect(
             x: mainWindowMaxX!,
             y: mainWindowMinY!,
-            width: manager.defaultDebugWindowWidth,
+            width: windowConstant.defaultDebugWindowWidth,
             height: mainWindowHeight!)
         if let debugWindow = self.debugWindow {
             

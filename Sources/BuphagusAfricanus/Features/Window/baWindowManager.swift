@@ -10,6 +10,25 @@ import Combine
 import Foundation
 import SwiftUI
 
+public struct windowConstant {
+    // 默认主窗口尺寸
+    public static let defaultMainWindowWidth: CGFloat = 400
+    public static let defaultMainWindowHeight: CGFloat = 600
+
+    // 默认调试窗口尺寸
+    public static let defaultDebugWindowWidth: CGFloat = 400
+
+    // debugwindow 和 mainwindow 的间隔
+    public static let debugWindowMainWindowSpacing: CGFloat = 0
+
+    public static let debugWindowInsideToMainWindowSpacing: CGFloat = 10
+    
+    // 吸附配置
+    public static let snapDistanceOutside: CGFloat = 50  // 外部吸附距离
+    public static let snapDistanceInside: CGFloat = 150  // 内部吸附距离
+    public static let dragStartThreshold: CGFloat = 0  // 拖动开始阈值
+}
+
 /// 提供一些窗口的计算移动等方法
 public class baWindowManager: ObservableObject {
 
@@ -21,55 +40,12 @@ public class baWindowManager: ObservableObject {
     let debugWindowName = "debugWindow"
 
     var activeWindow: NSWindow?
-
-    // 默认主窗口尺寸
-    let defaultMainWindowWidth: CGFloat = 400
-    let defaultMainWindowHeight: CGFloat = 600
-
-    // 默认调试窗口尺寸
-    let defaultDebugWindowWidth: CGFloat = 400
-
-    // debugwindow 和 mainwindow 的间隔
-    let debugWindowMainWindowSpacing: CGFloat = 0
-
-    let debugWindowInsideToMainWindowSpacing: CGFloat = 10
-
-    // 吸附配置
-    let snapDistanceOutside: CGFloat = 50  // 外部吸附距离
-    let snapDistanceInside: CGFloat = 150  // 内部吸附距离
-    let dragStartThreshold: CGFloat = 0  // 拖动开始阈值
+    
 
     @Published var showSelfDebugInfo: Bool = false
 
-    /// 开始拖动的位置
-    var dragStartLocation: NSPoint? {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                if showSelfDebugInfo {
-                    baDebugState.shared.updateWatchVariable(
-                        name: "dragStartLocationX",
-                        value: dragStartLocation?.x ?? 0, type: "Int")
-                    baDebugState.shared.updateWatchVariable(
-                        name: "dragStartLocationY",
-                        value: dragStartLocation?.y ?? 0, type: "Int")
-                }
-            }
-        }
-    }
-
     /// 开始拖动前的状态
-    var stateBeforeDrag: WindowState? {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                if showSelfDebugInfo {
-                    baDebugState.shared.updateWatchVariable(
-                        name: "stateBeforeDrag",
-                        value: stateBeforeDrag?.rawValue ?? "unknown",
-                        type: "String")
-                }
-            }
-        }
-    }
+    @PublishedDebugTracked("stateBeforeDrag") var stateBeforeDrag: WindowState = .attached
 
     /// 所有观察者
     @Published var observers: [baObserverInfo] = []
@@ -91,9 +67,11 @@ public class baWindowManager: ObservableObject {
         didSet {
             if baGlobalConfig.shared.isDebugMode {
                 baDebugState.shared.updateWatchVariable(
-                    name: "targetFrameX", value: targetFrame.origin.x, type: "Int")
+                    name: "targetFrameX", value: targetFrame.origin.x,
+                    type: "Int")
                 baDebugState.shared.updateWatchVariable(
-                    name: "targetFrameY", value: targetFrame.origin.y, type: "Int")
+                    name: "targetFrameY", value: targetFrame.origin.y,
+                    type: "Int")
             }
         }
     }
@@ -103,9 +81,11 @@ public class baWindowManager: ObservableObject {
         didSet {
             if baGlobalConfig.shared.isDebugMode {
                 baDebugState.shared.updateWatchVariable(
-                    name: "targetPositionX", value: targetPosition.x, type: "Int")
+                    name: "targetPositionX", value: targetPosition.x,
+                    type: "Int")
                 baDebugState.shared.updateWatchVariable(
-                    name: "targetPositionY", value: targetPosition.y, type: "Int")
+                    name: "targetPositionY", value: targetPosition.y,
+                    type: "Int")
             }
         }
     }
@@ -128,7 +108,8 @@ public class baWindowManager: ObservableObject {
         didSet {
             if baGlobalConfig.shared.isDebugMode {
                 baDebugState.shared.updateWatchVariable(
-                    name: "windowMode", value: windowMode.rawValue, type: "String")
+                    name: "windowMode", value: windowMode.rawValue,
+                    type: "String")
             }
         }
     }
@@ -144,15 +125,17 @@ public class baWindowManager: ObservableObject {
     }
 
     /// 窗口状态: 已吸附、已分离、拖拽中
-    @Published var windowState: WindowState = .attached {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "windowState", value: windowState.rawValue, type: "String"
-                )
-            }
-        }
-    }
+    //    @Published var windowState: WindowState = .attached {
+    //        didSet {
+    //            if baGlobalConfig.shared.isDebugMode {
+    //                baDebugState.shared.updateWatchVariable(
+    //                    name: "windowState", value: windowState.rawValue, type: "String"
+    //                )
+    //            }
+    //        }
+    //    }
+    @PublishedDebugTracked("windowState") var windowState: WindowState =
+        .attached
 
     // 窗口引用
     var debugWindow: NSWindow?
@@ -214,26 +197,32 @@ extension baWindowManager {
 
     /// 吸附 debug window 到 main window
     public func snapDebugWindowToMain() {
-        guard let currentWindow = debugWindow, let mainWindow = mainWindow else {
+        guard let currentWindow = debugWindow, let mainWindow = mainWindow
+        else {
             baDebugState.shared.system("debugWindow 或 mainWindow 为空")
             return
         }
 
-        let (newFrame, newSnapSide) = snapWindow(from: currentWindow, to: mainWindow)
+        let (newFrame, newSnapSide) = snapWindow(
+            from: currentWindow, to: mainWindow)
 
-        debugWindowSide = newSnapSide
+        debugWindowSide = newSnapSide ?? .right
 
-        animationWindow(actorWindow: currentWindow, fromFrame: currentWindow.frame, targetFrame: newFrame) {
+        animationWindow(
+            actorWindow: currentWindow, fromFrame: currentWindow.frame,
+            targetFrame: newFrame
+        ) {
             mainWindow.addChildWindow(currentWindow, ordered: .above)
-            #if DEVELOPMENT
+            if baGlobalConfig.shared.isDebugMode {
+
                 baDebugState.shared.system("吸附完成")
-            #endif
+            }
         }
 
         windowState = .attached
     }
 
-    public func animationWindow (
+    public func animationWindow(
         actorWindow: NSWindow,
         fromFrame: NSRect,
         targetFrame: NSRect,
@@ -243,60 +232,76 @@ extension baWindowManager {
     ) {
 
         switch aa {
-            case .animation1:
+        case .animation1:
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(
+                    name: .easeInEaseOut)
+                context.allowsImplicitAnimation = true
+
+                actorWindow.animator().setFrame(
+                    targetFrame, display: true, animate: true)
+
+            } completionHandler: {
+                completionHandler()
+            }
+        case .animation2:  // 动画2：使用 Core Animation 显式动画
+            let animation = CABasicAnimation(keyPath: "frame")
+            animation.fromValue = NSValue(rect: fromFrame)
+            animation.toValue = NSValue(rect: targetFrame)
+            animation.duration = duration
+            animation.timingFunction = CAMediaTimingFunction(
+                name: .easeInEaseOut)
+            actorWindow.animations = ["frame": animation]
+            actorWindow.animator().setFrame(targetFrame, display: true)
+            DispatchQueue.main.asyncAfter(deadline: .now() + animation.duration)
+            {
+                completionHandler()
+            }
+        case .animation3:  // 动画3：使用弹簧动画效果
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(
+                    controlPoints: 0.5, 1.8, 0.585, 0.885
+                )
+                context.allowsImplicitAnimation = true
+                actorWindow.animator().setFrame(
+                    targetFrame, display: true, animate: true)
+            } completionHandler: {
+                completionHandler()
+            }
+        case .animation4:  // 动画4：分步动画
+            let positionFrame = NSRect(
+                x: targetFrame.origin.x,
+                y: targetFrame.origin.y,
+                width: targetFrame.width,
+                height: targetFrame.height
+            )
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                actorWindow.animator().setFrame(positionFrame, display: true)
+            } completionHandler: {
+                // 第二步：调整大小
                 NSAnimationContext.runAnimationGroup { context in
                     context.duration = duration
-                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                    context.allowsImplicitAnimation = true
-
-                    actorWindow.animator().setFrame(targetFrame, display: true, animate: true)
-
+                    context.timingFunction = CAMediaTimingFunction(
+                        name: .easeInEaseOut)
+                    actorWindow.animator().setFrame(targetFrame, display: true)
                 } completionHandler: {
                     completionHandler()
                 }
-            case .animation2: // 动画2：使用 Core Animation 显式动画
-                let animation = CABasicAnimation(keyPath: "frame")
-                animation.fromValue = NSValue(rect: fromFrame)
-                animation.toValue = NSValue(rect: targetFrame)
-                animation.duration = duration
-                animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                actorWindow.animations = ["frame": animation]
-                actorWindow.animator().setFrame(targetFrame, display: true)
-                DispatchQueue.main.asyncAfter(deadline: .now() + animation.duration) {
-                    completionHandler()
-                }
-            case .animation3: // 动画3：使用弹簧动画效果
-                 NSAnimationContext.runAnimationGroup{ context in
-                     context.duration = duration
-                     context.timingFunction = CAMediaTimingFunction(
-                         controlPoints: 0.5, 1.8, 0.585, 0.885
-                     )
-                     context.allowsImplicitAnimation = true
-                     actorWindow.animator().setFrame(targetFrame, display: true, animate: true)
-                 } completionHandler: {
-                     completionHandler()
-                 }
-            case .animation4: // 动画4：分步动画
-                let positionFrame = NSRect(
-                    x: targetFrame.origin.x,
-                    y: targetFrame.origin.y,
-                    width: targetFrame.width,
-                    height: targetFrame.height
-                )
-                NSAnimationContext.runAnimationGroup{ context in
-                    context.duration = duration
-                    context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                    actorWindow.animator().setFrame(positionFrame, display: true)
-                } completionHandler: {
-                     // 第二步：调整大小
-                     NSAnimationContext.runAnimationGroup{ context in
-                         context.duration = duration
-                         context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                         actorWindow.animator().setFrame(targetFrame, display: true)
-                     } completionHandler: {
-                         completionHandler()
-                     }
-                }
+            }
+        }
+    }
+
+    public func makeWindowTrans(
+        a: NSWindow, aa: CGFloat, duration: TimeInterval = 0.15
+    ) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            a.animator().alphaValue = aa
         }
     }
 }
@@ -308,16 +313,13 @@ extension baWindowManager {
     private func isWindowsOverlapping(_ f1: NSRect, _ f2: NSRect) -> Bool {
         return f1.intersects(f2)
     }
-
-    /// 获取有效的吸附距离
-    func getEffectiveSnapDistance(for f1: NSRect, and f2: NSRect) -> CGFloat {
-        return isWindowsOverlapping(f1, f2) ? snapDistanceInside : snapDistanceOutside
-    }
-
-    func snapWindow(from floatWindow: NSWindow, to bottomWindow: NSWindow) -> (NSRect, Side){
+    func snapWindow(from floatWindow: NSWindow, to bottomWindow: NSWindow) -> (
+        NSRect, Side?
+    ) {
         let aFrame = floatWindow.frame
         let bFrame = bottomWindow.frame
-        return calculateDebugWindowFrame(float: aFrame, Bottom: bFrame, debugWindowInsideToMainWindowSpacing)
+        return calculateDebugWindowFrame(
+            float: aFrame, Bottom: bFrame, windowConstant.debugWindowInsideToMainWindowSpacing)
     }
 
     /// 计算调试窗口在不同位置的理想 frame
@@ -330,14 +332,18 @@ extension baWindowManager {
         float debugFrame: NSRect,
         Bottom mainFrame: NSRect,
         _ insideSpace: CGFloat
-    ) -> (NSRect, Side) {
+    ) -> (NSRect, Side?) {
 
         var newFrame = debugFrame
 
         /// 贴合到左侧外面
-        if debugFrame.midX < mainFrame.minX && mainFrame.minX < debugFrame.maxX {
-            newFrame.origin.x = min(0,
-                mainFrame.minX - defaultDebugWindowWidth - debugWindowMainWindowSpacing
+        if debugFrame.midX < mainFrame.minX && mainFrame.minX < debugFrame.maxX
+        {
+            newFrame.origin.x = max(
+                0,
+                mainFrame.minX
+                - windowConstant.defaultDebugWindowWidth
+                - windowConstant.debugWindowMainWindowSpacing
             )
             newFrame.origin.y = mainFrame.minY
             newFrame.size.height = mainFrame.size.height
@@ -345,7 +351,8 @@ extension baWindowManager {
         }
 
         /// 贴合到左侧内侧
-        if debugFrame.minX < mainFrame.minX && mainFrame.minX < debugFrame.midX {
+        if debugFrame.minX < mainFrame.minX && mainFrame.minX < debugFrame.midX
+        {
             newFrame.origin.x = mainFrame.minX + insideSpace
             newFrame.origin.y = mainFrame.minY + insideSpace
             newFrame.size.height = mainFrame.size.height - insideSpace * 2
@@ -353,7 +360,8 @@ extension baWindowManager {
         }
 
         /// 贴合到右侧外面
-        if debugFrame.minX < mainFrame.maxX && mainFrame.maxX < debugFrame.midX {
+        if debugFrame.minX < mainFrame.maxX && mainFrame.maxX < debugFrame.midX
+        {
             newFrame.origin.x = mainFrame.maxX
             newFrame.origin.y = mainFrame.minY
             newFrame.size.height = mainFrame.size.height
@@ -361,14 +369,16 @@ extension baWindowManager {
         }
 
         /// 贴合到右侧内侧
-        if debugFrame.midX < mainFrame.maxX && mainFrame.maxX < debugFrame.maxX {
-            newFrame.origin.x = mainFrame.maxX - defaultDebugWindowWidth - insideSpace
+        if debugFrame.midX < mainFrame.maxX && mainFrame.maxX < debugFrame.maxX
+        {
+            newFrame.origin.x =
+            mainFrame.maxX - windowConstant.defaultDebugWindowWidth - insideSpace
             newFrame.origin.y = mainFrame.minY + insideSpace
             newFrame.size.height = mainFrame.size.height - insideSpace * 2
             return (newFrame, .rightInside)
         }
 
         // 如果没有匹配任何条件，返回默认值
-        return (newFrame, .right)
+        return (newFrame, nil)
     }
 }

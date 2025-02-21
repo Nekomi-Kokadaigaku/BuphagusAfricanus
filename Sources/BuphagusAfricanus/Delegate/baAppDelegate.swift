@@ -30,10 +30,10 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
 
         // 创建 debug window
         dWindowD.createDebugWindow()
-        
+
         // 创建 debug window 的 configuration window
         let configureWindow = baConfigureWindowDelegate.shared.createConfigureWindow()
-        
+
         // 配置 main window
         mWindowD.setupMainWindow()
 
@@ -90,9 +90,9 @@ extension baAppDelegate {
         _ event: NSEvent, debugWindow: NSWindow, mainWindow: NSWindow
     ) -> NSEvent {
         switch event.type {
+
         case .leftMouseDown:
             // 记录拖动开始位置和状态
-            manager.dragStartLocation = debugWindow.convertPoint(fromScreen: NSEvent.mouseLocation)
             manager.stateBeforeDrag = manager.windowState
 
         case .leftMouseDragged:
@@ -100,56 +100,39 @@ extension baAppDelegate {
             manager.windowState = .dragging
 
             // 如果是激活的调试窗口被拖动，解除子窗口关系
-            if debugWindow.parent != nil && manager.activeWindow == debugWindow
-            {
+            if debugWindow.parent != nil && manager.activeWindow == debugWindow {
+
                 mainWindow.removeChildWindow(debugWindow)
-                #if DEVELOPMENT
+
+                if baGlobalConfig.shared.isDebugMode {
                     baDebugState.shared.system("解除子窗口关系")
-                #endif
+                }
             }
-
-            // 检查吸附
-            /// debug window 的 frame
-            let frame = debugWindow.frame
-            /// main window 的 frame
-            let mainFrame = mainWindow.frame
-            let snapDistance = manager.getEffectiveSnapDistance(
-                for: frame, and: mainFrame)
-            let distanceToLeftEdge = abs(frame.maxX - mainFrame.minX)
-            let distanceToRightEdge = abs(frame.minX - mainFrame.maxX)
-            let hasVerticalOverlap =
-                !(frame.maxY < mainFrame.minY || frame.minY > mainFrame.maxY)
-
-            // 更新吸附状态
-            manager.isReadyToSnap =
-                (distanceToLeftEdge <= snapDistance
-                    || distanceToRightEdge <= snapDistance)
-                && hasVerticalOverlap
 
         case .leftMouseUp:
-            // 重置拖动状态
-            manager.dragStartLocation = nil
+            let (newFrame, debugWindowSnapSide) = baWindowManager.shared.snapWindow(from: debugWindow, to: mainWindow)
 
-            // 处理吸附
-            if manager.isReadyToSnap {
-                handleDebugWindowSnap(
-                    debugWindow: debugWindow, mainWindow: mainWindow)
+            if let debugWindowSnapSide {
+                // 在吸附范围，进行吸附
+                manager.debugWindowSide = debugWindowSnapSide
+                manager.windowState = .attached
+                if [.leftInside, .rightInside].contains(debugWindowSnapSide) {
+                    manager.makeWindowTrans(a: debugWindow, aa: 0.64)
+                } else {
+                    manager.makeWindowTrans(a: debugWindow, aa: 1)                    
+                }
+                mainWindow.addChildWindow(debugWindow, ordered: .above)
             } else {
-                if manager.windowState == .dragging {
-                    manager.windowState = .detached
-                }
-                if manager.stateBeforeDrag == .detached {
-                    manager.windowState = .detached
-                }
+                manager.debugWindowSide = .right
+                manager.windowState = .detached
             }
 
-            manager.stateBeforeDrag = nil
-            manager.isReadyToSnap = false
-            if manager.windowState == .dragging {
-                #if DEVELOPMENT
-                    baDebugState.shared.userAction("结束拖动调试窗口")
-                #endif
-            }
+            baWindowManager.shared.animationWindow(
+                actorWindow: debugWindow,
+                fromFrame: debugWindow.frame,
+                targetFrame: newFrame,
+                duration: 0.15
+            )
 
         default:
             break
@@ -157,56 +140,7 @@ extension baAppDelegate {
 
         return event
     }
-
-    /// 处理调试窗口的吸附
-    private func handleDebugWindowSnap(
-        debugWindow: NSWindow, mainWindow: NSWindow
-    ) {
-        let frame = debugWindow.frame
-        let mainFrame = mainWindow.frame
-        var newFrame = frame
-
-        // 判断吸附方向
-        let snapDistance = manager.getEffectiveSnapDistance(
-            for: frame, and: mainFrame)
-        let distanceToLeftEdge = abs(frame.maxX - mainFrame.minX)
-        let distanceToRightEdge = abs(frame.minX - mainFrame.maxX)
-
-        if distanceToLeftEdge <= snapDistance {
-            // 吸附到左边
-            newFrame.origin.x = mainFrame.minX - frame.width - 1
-            newFrame.origin.y = mainFrame.minY
-            newFrame.size.height = mainFrame.height
-            manager.debugWindowSide = .left
-            #if DEVELOPMENT
-                baDebugState.shared.system("吸附到主窗口左侧")
-            #endif
-        } else if distanceToRightEdge <= snapDistance {
-            // 吸附到右边
-            newFrame.origin.x = mainFrame.maxX + 1
-            newFrame.origin.y = mainFrame.minY
-            newFrame.size.height = mainFrame.height
-            manager.debugWindowSide = .right
-            #if DEVELOPMENT
-                baDebugState.shared.system("吸附到主窗口右侧")
-            #endif
-        }
-
-        manager.animationWindow(
-            actorWindow: debugWindow,
-            fromFrame: newFrame,
-            targetFrame: newFrame,
-            duration: 0.15
-        ) {
-            mainWindow.addChildWindow(debugWindow, ordered: .above)
-            // #if DEVELOPMENT
-            //     baDebugState.shared.system("执行吸附动画并设置为子窗口")
-            // #endif
-        }
-
-        manager.windowState = .attached
-    }
-
+    
     /// 移除监听器
     private func removeObservers() {
         if let monitor = windowMonitor {
@@ -256,13 +190,12 @@ extension baAppDelegate {
         #endif
     }
 
-    /// 处理主窗口移动事件
-    /// 主窗口移动时，如果 debug window 是子窗口，则更新 debug window 的位置
-    /// 否则，不做任何操作
+    /// 主要作用：debug window初始在不正确的地方，此时移动会纠正到正确的位置。
+    /// 不修改的话会出现 debug window 处于错误位置但是跟着 main window 一起移动
     private func handleMainWindowMove(_ notification: Notification) {
         guard let mainWindow = notification.object as? NSWindow,
             let debugWindow = manager.debugWindow,
-            debugWindow.parent != nil
+            debugWindow.parent != nil, manager.windowState != .detached
         else {
             return
         }
@@ -270,26 +203,12 @@ extension baAppDelegate {
         // 更新调试窗口位置
         var newFrame = debugWindow.frame
 
-        // 判断调试窗口在主窗口的哪一侧
-        // if debugWindow.frame.minX < mainWindow.frame.minX {
-        //     // 在左侧
-        //     newFrame.origin.x = mainWindow.frame.minX - debugWindow.frame.width - 1
-        // } else {
-        //     // 在右侧
-        //     newFrame.origin.x = mainWindow.frame.maxX + 1
-        // }
+        newFrame = moveFrame(
+            from: debugWindow.frame,
+            to: mainWindow.frame,
+            manager.debugWindowSide
+        )
 
-        if manager.debugWindowSide == .left {
-            newFrame.origin.x =
-                mainWindow.frame.minX - debugWindow.frame.width
-                - manager.debugWindowMainWindowSpacing
-        } else {
-            newFrame.origin.x =
-                mainWindow.frame.maxX + manager.debugWindowMainWindowSpacing
-        }
-
-        newFrame.origin.y = mainWindow.frame.minY
-        newFrame.size.height = mainWindow.frame.height
         debugWindow.setFrame(newFrame, display: true)
     }
 
@@ -320,32 +239,50 @@ extension baAppDelegate {
         guard let mainWindow = notification.object as? NSWindow,
             let debugWindow = manager.debugWindow, debugWindow.parent != nil else { return }
 
-        var newFrame = debugWindow.frame
-        newFrame.size.height = mainWindow.frame.height
+        var newFrame = moveFrame(
+            from: debugWindow.frame,
+            to: mainWindow.frame,
+            manager.debugWindowSide
+        )
+        debugWindow.setFrame(newFrame, display: true)
+    }
 
-        // 判断 debugWindow 在主窗口的哪一侧
-        if manager.debugWindowSide == .left {  // debugWindow 在左侧
-            newFrame.origin.x =
-                mainWindow.frame.minX
-                - debugWindow.frame.width
-                - manager.debugWindowMainWindowSpacing
-        } else {  // debugWindow 在右侧
-            newFrame.origin.x =
-                mainWindow.frame.maxX
-                + manager.debugWindowMainWindowSpacing
-        }
-        newFrame.origin.y = mainWindow.frame.minY
+    private func moveFrame(from aFrame: NSRect, to bFrame: NSRect, _ aa: baWindowManager.Side) -> NSRect {
 
-        if manager.windowMode == .animation {
-            manager.animationWindow(
-                actorWindow: debugWindow,
-                fromFrame: newFrame,
-                targetFrame: newFrame,
-                duration: 0.4,
-                completionHandler: {}
-            )
-        } else {
-            debugWindow.setFrame(newFrame, display: true)
+        var newFrame = aFrame // a debug b main
+
+        switch aa {
+
+        case .left:
+            newFrame.origin.x = bFrame.minX
+                                - aFrame.width
+                                - windowConstant.debugWindowMainWindowSpacing
+        case .right:
+            newFrame.origin.x = bFrame.maxX + windowConstant.debugWindowMainWindowSpacing
+        case .leftInside:
+            newFrame.origin.x = bFrame.minX + windowConstant.debugWindowInsideToMainWindowSpacing
+        case .rightInside:
+            newFrame.origin.x = bFrame.maxX
+                                - aFrame.width
+                                - windowConstant.debugWindowInsideToMainWindowSpacing
         }
+
+        switch manager.debugWindowSide {
+
+        case .left, .right:
+            newFrame.origin.y = bFrame.minY
+        case .leftInside, .rightInside:
+            newFrame.origin.y = bFrame.minY + windowConstant.debugWindowInsideToMainWindowSpacing
+        }
+
+        switch manager.debugWindowSide {
+
+        case .left, .right:
+            newFrame.size.height = bFrame.height
+        case .leftInside, .rightInside:
+            newFrame.size.height = bFrame.height - windowConstant.debugWindowInsideToMainWindowSpacing * 2
+        }
+
+        return newFrame
     }
 }
