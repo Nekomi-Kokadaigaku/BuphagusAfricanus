@@ -7,10 +7,10 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
     // MARK: - Properties
     public static let shared = baMainWindowDelegate("baMainWindowDelegate")
     private let manager = baWindowManager.shared
-    public var indentifier: String = "baMainWindowDelegate"
+    public var identifier: String = "baMainWindowIdentifier"
     public var window: NSWindow?
     private init(_ identifier: String) {
-        self.indentifier = identifier
+        self.identifier = identifier
     }
 
     /// 配置主窗口的一些属性包括delegate标题等
@@ -20,12 +20,8 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
 
         self.window = NSApplication.shared.windows.first
-//        self.window?.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
-//        self.window?.styleMask = [.titled, .resizable]
-//        self.window?.styleMask = [.resizable]
         self.window?.delegate = self
-//        self.window?.title = "Bilibili"
-        self.window?.identifier = NSUserInterfaceItemIdentifier(self.indentifier)
+        self.window?.identifier = NSUserInterfaceItemIdentifier(self.identifier)
         self.window?.isReleasedWhenClosed = true
 
         self.window?.standardWindowButton(.closeButton)?.isHidden = true
@@ -65,11 +61,11 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 
     // MARK: - Methods
     func setIdentifier(_ identifier: String) {
-        self.indentifier = identifier
+        self.identifier = identifier
     }
 
     func getIdentifier() -> String {
-        return indentifier
+        return identifier
     }
 
     func bindWindow(_ window: NSWindow) {
