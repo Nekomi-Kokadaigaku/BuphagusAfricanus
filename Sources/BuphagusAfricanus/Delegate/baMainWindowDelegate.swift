@@ -32,7 +32,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true
         self.window?.standardWindowButton(.zoomButton)?.isHidden = true
 
-        self.window?.alphaValue = 0.98
+        self.window?.alphaValue = 1
         self.window?.animationBehavior = .documentWindow
         // 工具提示
         self.window?.toolbar?.displayMode = .iconOnly           // 工具栏显示模式
@@ -41,7 +41,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         // 外观设置
         self.window?.titlebarAppearsTransparent = true
         self.window?.titleVisibility = .hidden
-        self.window?.isMovableByWindowBackground = true
+        self.window?.isMovableByWindowBackground = false
         // self.window?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
 
         // 内容视图设置

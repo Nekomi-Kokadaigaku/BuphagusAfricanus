@@ -181,17 +181,18 @@ extension baDebugWindowDelegate {
     private func handleWindowActivation(_ window: NSWindow) {
         // 处理窗口激活
         manager.activeWindow = window
-        #if DEVELOPMENT
-        if window == manager.debugWindow {
-            baDebugState.shared.system("debug window did become key", details: """
+        if baGlobalConfig.shared.isDebugMode {
+            
+            if window == manager.debugWindow {
+                baDebugState.shared.system("debug window did become key", details: """
                 Identifier: \(window.identifier?.rawValue ?? "none")
                 FileName: \((#file as NSString).lastPathComponent)
                 FileID: \(#fileID)
                 Function: \(#function)
                 Line: \(#line)
                 """)
+            }
         }
-        #endif
     }
 }
 

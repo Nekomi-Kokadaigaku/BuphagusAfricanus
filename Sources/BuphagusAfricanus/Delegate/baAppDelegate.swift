@@ -239,7 +239,7 @@ extension baAppDelegate {
         guard let mainWindow = notification.object as? NSWindow,
             let debugWindow = manager.debugWindow, debugWindow.parent != nil else { return }
 
-        var newFrame = moveFrame(
+        let newFrame = moveFrame(
             from: debugWindow.frame,
             to: mainWindow.frame,
             manager.debugWindowSide

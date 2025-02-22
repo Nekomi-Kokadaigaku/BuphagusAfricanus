@@ -52,16 +52,6 @@ struct baDebugView: View {
         .frame(minWidth: 350)
         .background(baVisualEffectView().ignoresSafeArea())
         .allowsHitTesting(true)
-        .onAppear {
-            if baGlobalConfig.shared.isDebugMode {
-                debugState.updateWatchVariable(name: "isReadyToSnap", value: manager.isReadyToSnap, type: "Bool")
-                debugState.updateWatchVariable(name: "windowState", value: manager.windowState.rawValue, type: "String")
-                debugState.updateWatchVariable(name: "windowMode", value: manager.windowMode.rawValue, type: "String")
-                debugState.updateWatchVariable(name: "debugWindowSide", value: manager.debugWindowSide.rawValue, type: "String")
-                debugState.updateWatchVariable(name: "targetFrameX", value: manager.targetFrame.origin.x, type: "Int")
-                debugState.updateWatchVariable(name: "targetFrameY", value: manager.targetFrame.origin.y, type: "Int")
-            }
-        }
         .onDisappear {
             // 发送重置通知
             NotificationCenter.default.post(

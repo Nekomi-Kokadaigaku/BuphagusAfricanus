@@ -22,7 +22,7 @@ public struct windowConstant {
     public static let debugWindowMainWindowSpacing: CGFloat = 0
 
     public static let debugWindowInsideToMainWindowSpacing: CGFloat = 10
-    
+
     // 吸附配置
     public static let snapDistanceOutside: CGFloat = 50  // 外部吸附距离
     public static let snapDistanceInside: CGFloat = 150  // 内部吸附距离
@@ -40,7 +40,7 @@ public class baWindowManager: ObservableObject {
     let debugWindowName = "debugWindow"
 
     var activeWindow: NSWindow?
-    
+
 
     @Published var showSelfDebugInfo: Bool = false
 
@@ -51,44 +51,8 @@ public class baWindowManager: ObservableObject {
     @Published var observers: [baObserverInfo] = []
 
     /// debug window 贴合方向
-    @Published var debugWindowSide: Side = .right {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "debugWindowSide",
-                    value: debugWindowSide.rawValue,
-                    type: "String")
-            }
-        }
-    }
+    @PublishedDebugTracked1("debugWindowSide") var debugWindowSide: Side = .right
 
-    /// 期望的窗口位置
-    @Published var targetFrame: NSRect = .zero {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "targetFrameX", value: targetFrame.origin.x,
-                    type: "Int")
-                baDebugState.shared.updateWatchVariable(
-                    name: "targetFrameY", value: targetFrame.origin.y,
-                    type: "Int")
-            }
-        }
-    }
-
-    /// 期望的坐标点
-    @Published var targetPosition: CGPoint = .zero {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "targetPositionX", value: targetPosition.x,
-                    type: "Int")
-                baDebugState.shared.updateWatchVariable(
-                    name: "targetPositionY", value: targetPosition.y,
-                    type: "Int")
-            }
-        }
-    }
 
     /// 是否需要更新窗口位置
     @Published var needUpdate = false {
@@ -104,38 +68,13 @@ public class baWindowManager: ObservableObject {
     @Published var lastUpdate: Date = .init()
 
     /// 窗口动画模式
-    @Published var windowMode: WindowMode = .direct {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "windowMode", value: windowMode.rawValue,
-                    type: "String")
-            }
-        }
-    }
+    @PublishedDebugTracked1("windowMode") var windowMode: WindowMode = .direct
 
     /// 是否准备好吸附
-    @Published var isReadyToSnap = false {
-        didSet {
-            if baGlobalConfig.shared.isDebugMode {
-                baDebugState.shared.updateWatchVariable(
-                    name: "isReadyToSnap", value: isReadyToSnap, type: "Bool")
-            }
-        }
-    }
+    @PublishedDebugTracked1("isReadyToSnap") var isReadyToSnap = false
 
     /// 窗口状态: 已吸附、已分离、拖拽中
-    //    @Published var windowState: WindowState = .attached {
-    //        didSet {
-    //            if baGlobalConfig.shared.isDebugMode {
-    //                baDebugState.shared.updateWatchVariable(
-    //                    name: "windowState", value: windowState.rawValue, type: "String"
-    //                )
-    //            }
-    //        }
-    //    }
-    @PublishedDebugTracked("windowState") var windowState: WindowState =
-        .attached
+    @PublishedDebugTracked("windowState") var windowState: WindowState = .attached
 
     // 窗口引用
     var debugWindow: NSWindow?
