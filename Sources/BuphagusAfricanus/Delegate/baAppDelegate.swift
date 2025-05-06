@@ -2,31 +2,27 @@
 //  baAppDelegate.swift
 //  BuphagusAfricanus
 //
-//  Created by Iris on 2025-02-12.
-//
 
 import SwiftUI
 
 
-/// 应用程序代理
-/// 负责应用程序的生命周期管理
-/// 处理window delegate做不到的事情
+///
 public class baAppDelegate: NSObject, NSApplicationDelegate {
 
-    ///
+    /// 窗口监视器
     var windowMonitor: Any?
     var resizeObserver: NSObjectProtocol?
     let manager = baWindowManager.shared
     let debugState = baDebugState.shared
 
     let currentScreen = NSScreen.main ?? NSScreen.screens.first
+    // 获取 main window 和 debug window
+    let mWindowD = baMainWindowDelegate.shared
+    let dWindowD = baDebugWindowDelegate.shared
 
-    /// 应用程序完成启动，进行debug window 等的初始化
+    /// 应用程序完成启动，进行 Debug Window 等的初始化
     public func applicationDidFinishLaunching(_ notification: Notification) {
 
-        // 获取 main window 和 debug window
-        let mWindowD = baMainWindowDelegate.shared
-        let dWindowD = baDebugWindowDelegate.shared
 
         // 创建 debug window
         dWindowD.createDebugWindow()
@@ -55,15 +51,20 @@ public class baAppDelegate: NSObject, NSApplicationDelegate {
 
         // 显示调试窗口
         // debugWindow.makeKeyAndOrderFront(nil)
+        manager.mainWindow?.makeKeyAndOrderFront(nil)
     }
 
     /// 应用程序退出时，移除监听器
-    public func applicationWillTerminate(_ notification: Notification) {
+    public func applicationWillTerminate(
+        _ notification: Notification
+    ) {
         removeObservers()
     }
 
     /// 所有窗口都关闭后退出，一般开发的时候都关了就可以退出了，避免卡住
-    public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    public func applicationShouldTerminateAfterLastWindowClosed(
+        _ sender: NSApplication
+    ) -> Bool { true }
 }
 
 // MARK: - 配置调试信息窗口
@@ -87,7 +88,9 @@ extension baAppDelegate {
 
     /// 处理调试窗口的拖拽事件
     private func handleDebugWindowDrag(
-        _ event: NSEvent, debugWindow: NSWindow, mainWindow: NSWindow
+        _ event: NSEvent,
+        debugWindow: NSWindow,
+        mainWindow: NSWindow
     ) -> NSEvent {
         switch event.type {
 
@@ -119,7 +122,7 @@ extension baAppDelegate {
                 if [.leftInside, .rightInside].contains(debugWindowSnapSide) {
                     manager.makeWindowTrans(a: debugWindow, aa: 0.64)
                 } else {
-                    manager.makeWindowTrans(a: debugWindow, aa: 1)                    
+                    manager.makeWindowTrans(a: debugWindow, aa: 1)
                 }
                 mainWindow.addChildWindow(debugWindow, ordered: .above)
             } else {
@@ -140,7 +143,7 @@ extension baAppDelegate {
 
         return event
     }
-    
+
     /// 移除监听器
     private func removeObservers() {
         if let monitor = windowMonitor {
@@ -256,15 +259,15 @@ extension baAppDelegate {
         case .left:
             newFrame.origin.x = bFrame.minX
                                 - aFrame.width
-                                - windowConstant.debugWindowMainWindowSpacing
+                                - baConsts.debugWindowMainWindowSpacing
         case .right:
-            newFrame.origin.x = bFrame.maxX + windowConstant.debugWindowMainWindowSpacing
+            newFrame.origin.x = bFrame.maxX + baConsts.debugWindowMainWindowSpacing
         case .leftInside:
-            newFrame.origin.x = bFrame.minX + windowConstant.debugWindowInsideToMainWindowSpacing
+            newFrame.origin.x = bFrame.minX + baConsts.debugWindowInsideToMainWindowSpacing
         case .rightInside:
             newFrame.origin.x = bFrame.maxX
                                 - aFrame.width
-                                - windowConstant.debugWindowInsideToMainWindowSpacing
+                                - baConsts.debugWindowInsideToMainWindowSpacing
         }
 
         switch manager.debugWindowSide {
@@ -272,7 +275,7 @@ extension baAppDelegate {
         case .left, .right:
             newFrame.origin.y = bFrame.minY
         case .leftInside, .rightInside:
-            newFrame.origin.y = bFrame.minY + windowConstant.debugWindowInsideToMainWindowSpacing
+            newFrame.origin.y = bFrame.minY + baConsts.debugWindowInsideToMainWindowSpacing
         }
 
         switch manager.debugWindowSide {
@@ -280,7 +283,7 @@ extension baAppDelegate {
         case .left, .right:
             newFrame.size.height = bFrame.height
         case .leftInside, .rightInside:
-            newFrame.size.height = bFrame.height - windowConstant.debugWindowInsideToMainWindowSpacing * 2
+            newFrame.size.height = bFrame.height - baConsts.debugWindowInsideToMainWindowSpacing * 2
         }
 
         return newFrame

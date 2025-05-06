@@ -224,10 +224,4 @@ extension baConfigureWindowDelegate {
             showConfigureWindow()
         }
     }
-
-    // TODO: - 重置窗口位置到 main window 的右侧并吸附
-    func resetWindowPosition() {
-        guard let window = manager.debugWindow else { return }
-        window.setFrame(initialFrame, display: true)
-    }
 }

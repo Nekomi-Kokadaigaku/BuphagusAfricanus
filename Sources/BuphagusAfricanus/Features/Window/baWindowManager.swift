@@ -2,8 +2,6 @@
 //  baWindowManager.swift
 //  BuphagusAfricanus
 //
-//  Created by Iris on 2025-01-28.
-//
 
 import AppKit
 import Combine
@@ -11,22 +9,7 @@ import Foundation
 import SwiftUI
 
 public struct windowConstant {
-    // 默认主窗口尺寸
-    public static let defaultMainWindowWidth: CGFloat = 400
-    public static let defaultMainWindowHeight: CGFloat = 600
 
-    // 默认调试窗口尺寸
-    public static let defaultDebugWindowWidth: CGFloat = 400
-
-    // debugwindow 和 mainwindow 的间隔
-    public static let debugWindowMainWindowSpacing: CGFloat = 0
-
-    public static let debugWindowInsideToMainWindowSpacing: CGFloat = 10
-
-    // 吸附配置
-    public static let snapDistanceOutside: CGFloat = 50  // 外部吸附距离
-    public static let snapDistanceInside: CGFloat = 150  // 内部吸附距离
-    public static let dragStartThreshold: CGFloat = 0  // 拖动开始阈值
 }
 
 /// 提供一些窗口的计算移动等方法
@@ -258,7 +241,10 @@ extension baWindowManager {
         let aFrame = floatWindow.frame
         let bFrame = bottomWindow.frame
         return calculateDebugWindowFrame(
-            float: aFrame, Bottom: bFrame, windowConstant.debugWindowInsideToMainWindowSpacing)
+            float: aFrame,
+            Bottom: bFrame,
+            baConsts.debugWindowInsideToMainWindowSpacing
+        )
     }
 
     /// 计算调试窗口在不同位置的理想 frame
@@ -281,8 +267,8 @@ extension baWindowManager {
             newFrame.origin.x = max(
                 0,
                 mainFrame.minX
-                - windowConstant.defaultDebugWindowWidth
-                - windowConstant.debugWindowMainWindowSpacing
+                - baConsts.defaultDebugWindowWidth
+                - baConsts.debugWindowMainWindowSpacing
             )
             newFrame.origin.y = mainFrame.minY
             newFrame.size.height = mainFrame.size.height
@@ -311,7 +297,7 @@ extension baWindowManager {
         if debugFrame.midX < mainFrame.maxX && mainFrame.maxX < debugFrame.maxX
         {
             newFrame.origin.x =
-            mainFrame.maxX - windowConstant.defaultDebugWindowWidth - insideSpace
+            mainFrame.maxX - baConsts.defaultDebugWindowWidth - insideSpace
             newFrame.origin.y = mainFrame.minY + insideSpace
             newFrame.size.height = mainFrame.size.height - insideSpace * 2
             return (newFrame, .rightInside)

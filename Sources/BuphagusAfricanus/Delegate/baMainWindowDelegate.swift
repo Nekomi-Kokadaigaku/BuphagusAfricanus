@@ -1,23 +1,29 @@
+//
+//  baAppDelegate.swift
+//  BuphagusAfricanus
+//
+
 import AppKit
 import SwiftUI
 
 
 /// 主窗口的代理
 class baMainWindowDelegate: NSObject, NSWindowDelegate {
-    // MARK: - Properties
+
     public static let shared = baMainWindowDelegate("baMainWindowDelegate")
+    
     private let manager = baWindowManager.shared
+    
     public var identifier: String = "baMainWindowIdentifier"
+    
     public var window: NSWindow?
+    
     private init(_ identifier: String) {
         self.identifier = identifier
     }
 
     /// 配置主窗口的一些属性包括delegate标题等
     @MainActor func setupMainWindow() {
-        // 确保在主线程上执行
-        // guard let self = self else { return }
-
 
         self.window = NSApplication.shared.windows.first
         self.window?.delegate = self
@@ -37,7 +43,7 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
         // 外观设置
         self.window?.titlebarAppearsTransparent = true
         self.window?.titleVisibility = .hidden
-        self.window?.isMovableByWindowBackground = false
+        self.window?.isMovableByWindowBackground = true
         // self.window?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
 
         // 内容视图设置
@@ -75,7 +81,10 @@ class baMainWindowDelegate: NSObject, NSWindowDelegate {
 }
 
 extension baMainWindowDelegate {
-    func windowDidBecomeKey(_ notification: Notification) {
+
+    func windowDidBecomeKey(
+        _ notification: Notification
+    ) {
         if baGlobalConfig.shared.isDebugMode {
             baDebugState.shared.system("main window did become key")
         }

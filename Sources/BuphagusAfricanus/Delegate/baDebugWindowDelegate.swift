@@ -1,8 +1,6 @@
 //
 //  baDebugWindowDelegate.swift
-//  BiliBili
-//
-//  Created by Iris on 2025-02-12.
+//  BiriBiri
 //
 
 import AppKit
@@ -11,7 +9,7 @@ import SwiftUI
 
 /// 调试窗口的代理
 class baDebugWindowDelegate: NSObject, NSWindowDelegate {
-    // MARK: - Properties
+
     static let shared = baDebugWindowDelegate()
     private let manager = baWindowManager.shared
     private let configManager = baConfigurationManager.shared
@@ -21,20 +19,10 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
     private var windowConfig: baConfiguration.WindowConfig {
         configManager.config.window
     }
-
-    // MARK: - 创建调试窗口
-    ///
-    /// 调试窗口的初始化配置:
-    /// - 位置: 屏幕最右侧
-    /// - 高度: 与主窗口相同
-    /// - 界面元素:
-    ///   - 隐藏标题栏
-    ///   - 隐藏关闭按钮
-    ///   - 隐藏最小化按钮
-    ///   - 隐藏缩放按钮
-    // func createDebugWindow() -> NSWindow {
-    func createDebugWindow() {
-        let window = NSWindow(
+    
+    public lazy var window: NSWindow = {
+        
+        let debugWindow = NSWindow(
             contentRect: initialFrame,
             styleMask: [
                 .titled,
@@ -45,48 +33,55 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
+        debugWindow.titlebarAppearsTransparent = true
+        debugWindow.titleVisibility = .hidden
+        
+        [.closeButton, .miniaturizeButton, .zoomButton].forEach { button in
+            debugWindow.standardWindowButton(button)?.isHidden = true
+        }
 
-        configureWindow(window)
-        self.debugWindow = window
-        // return window
-    }
+        debugWindow.title = manager.debugWindowName
+        debugWindow.identifier = NSUserInterfaceItemIdentifier(manager.debugWindowName)
+        debugWindow.delegate = self
 
-    /// 配置调试窗口
-    private func configureWindow(_ window: NSWindow) {
-        // 基本设置
-        window.title = manager.debugWindowName
-        window.identifier = NSUserInterfaceItemIdentifier(manager.debugWindowName)
-        window.delegate = self
-
-        window.alphaValue = 0.64
-        window.hasShadow = true
-
-        window.animationBehavior = .documentWindow
-        // 工具提示
-        window.toolbar?.displayMode = .iconOnly           // 工具栏显示模式
-        window.toolbar?.isVisible = true                  // 工具栏是否可见
+        debugWindow.hasShadow = true
+        debugWindow.animationBehavior = .documentWindow
+        // 工具栏显示模式
+        debugWindow.toolbar?.displayMode = .iconOnly
+        // 工具栏是否可见
+        debugWindow.toolbar?.isVisible = true
 
         // 外观设置
-        window.titleVisibility = .visible
-        window.titlebarAppearsTransparent = true
-        window.isMovableByWindowBackground = true
-        window.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
+        debugWindow.titleVisibility = .hidden
+        debugWindow.titlebarAppearsTransparent = true
+        debugWindow.isMovableByWindowBackground = true
+        debugWindow.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
 
         // 内容视图设置
-        window.contentView = NSHostingView(rootView: baDebugView())
-        window.contentView?.wantsLayer = true
-        window.contentView?.layerContentsRedrawPolicy = .onSetNeedsDisplay
-
-
-        // 大小限制
-        window.minSize = NSSize(
+        debugWindow.contentView = NSHostingView(rootView: baDebugView())
+        debugWindow.contentView?.wantsLayer = true
+        debugWindow.contentView?.layerContentsRedrawPolicy = .onSetNeedsDisplay
+        
+        debugWindow.minSize = NSSize(
             width: windowConfig.minWidth,
             height: windowConfig.minHeight
         )
 
-        // 层级设置
-        window.level = .floating
-        window.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        debugWindow.contentView = NSHostingView(rootView: baDebugView())
+        debugWindow.contentView?.wantsLayer = true
+        debugWindow.contentView?.layerContentsRedrawPolicy = .onSetNeedsDisplay
+        
+        debugWindow.makeKeyAndOrderFront(nil)
+        debugWindow.level = .floating
+        debugWindow.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        
+        debugWindow.makeKeyAndOrderFront(nil)
+        
+        return debugWindow
+    } ()
+
+    func createDebugWindow() {
+        self.debugWindow = window
     }
 
     // MARK: - Window Initial Frame
@@ -108,11 +103,6 @@ class baDebugWindowDelegate: NSObject, NSWindowDelegate {
 // MARK: - Window Delegate Methods
 extension baDebugWindowDelegate {
 
-    func windowWillClose(_ notification: Notification) {
-        guard let window = notification.object as? NSWindow else { return }
-        saveWindowState(window)
-    }
-
     func windowDidBecomeKey(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         manager.activeWindow = window
@@ -129,18 +119,6 @@ extension baDebugWindowDelegate {
                 baDebugState.shared.system("debug window did move, but not active")
             }
         }
-    }
-
-    // MARK: - Window State Management
-    private func saveWindowState(_ window: NSWindow) {
-        // 保存窗口位置和大小
-        let frameDict = [
-            "x": window.frame.origin.x,
-            "y": window.frame.origin.y,
-            "width": window.frame.size.width,
-            "height": window.frame.size.height
-        ]
-        UserDefaults.standard.set(frameDict, forKey: "debug_window_frame")
     }
 
     private func restoreWindowState(_ window: NSWindow) {
@@ -281,14 +259,16 @@ extension baDebugWindowDelegate {
         let startFrame = NSRect(
             x: mainWindowMaxX!,
             y: mainWindowMinY! + (mainWindowHeight! - 200),
-            width: windowConstant.defaultDebugWindowWidth,
-            height: 200)
+            width: baConsts.defaultDebugWindowWidth,
+            height: 200
+        )
 
         let endFrame = NSRect(
             x: mainWindowMaxX!,
             y: mainWindowMinY!,
-            width: windowConstant.defaultDebugWindowWidth,
-            height: mainWindowHeight!)
+            width: baConsts.defaultDebugWindowWidth,
+            height: mainWindowHeight!
+        )
         if let debugWindow = self.debugWindow {
             
             // 放到正确位置

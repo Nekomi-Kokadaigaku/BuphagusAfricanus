@@ -17,7 +17,7 @@ class baConfigurationManager: ObservableObject {
     @Published private(set) var config: baConfiguration
 
     private init() {
-        print("ConfigurationManager: Initializing...")
+        baDebugState.shared.system("ConfigurationManager: Initializing...")
 
         // 先设置默认配置
         self.config = .default
@@ -28,7 +28,7 @@ class baConfigurationManager: ObservableObject {
         // 尝试加载配置
         loadConfiguration()
 
-        print("ConfigurationManager: Initialization completed")
+        baDebugState.shared.system("ConfigurationManager: Initialization completed")
     }
 }
 
@@ -45,12 +45,12 @@ extension baConfigurationManager {
                 create: true
             )
             let bundleID = Bundle.main.bundleIdentifier ?? "com.app.debugwindow"
-            print("ConfigurationManager: Bundle ID - \(bundleID)")
-            print("ConfigurationManager: App Support - \(appSupport)")
+            baDebugState.shared.system("ConfigurationManager: Bundle ID - \(bundleID)")
+            baDebugState.shared.system("ConfigurationManager: App Support - \(appSupport)")
             let appFolder = appSupport.appendingPathComponent(bundleID)
             return appFolder.appendingPathComponent(config.configFileName)
         } catch {
-            print(
+            baDebugState.shared.system(
                 "ConfigurationManager: Failed to get config file URL - \(error)"
             )
             return nil
@@ -60,7 +60,7 @@ extension baConfigurationManager {
     /// 创建配置文件目录
     private func createConfigurationDirectory() {
         guard let fileURL = configFileURL else {
-            print("ConfigurationManager: No valid config file URL")
+            baDebugState.shared.system("ConfigurationManager: No valid config file URL")
             return
         }
 
@@ -69,9 +69,9 @@ extension baConfigurationManager {
                 at: fileURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
-            print("ConfigurationManager: Directory created successfully")
+            baDebugState.shared.system("ConfigurationManager: Directory created successfully")
         } catch {
-            print("ConfigurationManager: Failed to create directory - \(error)")
+            baDebugState.shared.system("ConfigurationManager: Failed to create directory - \(error)")
         }
     }
 
